@@ -50,6 +50,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 app = FastAPI()
 
+origins = ["*"]
+
 upload_dir = os.path.join(os.path.dirname(__file__), "uploads")
 
 @app.post("/upload/image")
