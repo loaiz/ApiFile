@@ -6,6 +6,9 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import UploadFile, File
 import os
+from fastapi.responses import StreamingResponse
+from starlette.responses import FileResponse
+
 
 SECRET_KEY = "83daa0256a2289b0fb23693bf1f6034d44396675749244721a2b20e896e11662"
 ALGORITHM = "HS256"
@@ -59,4 +62,9 @@ async def upload_image(file: UploadFile = File(...), cedula: str = Form(...), no
     contents = await file.read()
     with open(os.path.join(upload_dir, file.filename), "wb") as f:
         f.write(contents)
-    return {"filename": file.filename, "cedula": cedula, "nombre": nombre}
+    
+    # Obtener la ruta completa del archivo subido
+    file_path = os.path.join(upload_dir, file.filename)
+    
+    # Descargar el archivo en el computador del usuario
+    return FileResponse(file_path, filename=file.filename)
