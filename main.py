@@ -6,7 +6,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import UploadFile, File
 import os
-import asyncpg
+# import asyncpg
 from fastapi.responses import StreamingResponse
 from starlette.responses import FileResponse
 from Modelo import candas
