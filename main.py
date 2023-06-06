@@ -65,9 +65,9 @@ edit_dir = os.path.join(os.path.dirname(__file__),)
 
 @app.post("/editar")
 async def upload_image(cedula: str = Form(...), nombre: str = Form(...)):
-    contents = await file.read()
-    with open(os.path.join(upload_dir, file.filename), "wb") as f:
-        f.write(contents)
+#     contents = await file.read()
+#     with open(os.path.join(upload_dir, file.filename), "wb") as f:
+#         f.write(contents)
     
     print(edit_dir)
     # Obtener la ruta completa del archivo subido
