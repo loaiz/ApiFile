@@ -6,8 +6,12 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import UploadFile, File
 import os
+import asyncpg
 from fastapi.responses import StreamingResponse
 from starlette.responses import FileResponse
+from Modelo import candas
+import pandas as pd
+import json
 
 
 SECRET_KEY = "83daa0256a2289b0fb23693bf1f6034d44396675749244721a2b20e896e11662"
@@ -51,20 +55,46 @@ class UserInDB(User):
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-app = FastAPI()
 
-origins = ["*"]
+app = FastAPI()
 
 upload_dir = os.path.join(os.path.dirname(__file__), "uploads")
 
-@app.post("/upload/image")
+edit_dir = os.path.join(os.path.dirname(__file__),)
+
+
+@app.post("/editar")
 async def upload_image(file: UploadFile = File(...), cedula: str = Form(...), nombre: str = Form(...)):
     contents = await file.read()
     with open(os.path.join(upload_dir, file.filename), "wb") as f:
         f.write(contents)
     
+    print(edit_dir)
     # Obtener la ruta completa del archivo subido
-    file_path = os.path.join(upload_dir, file.filename)
+    file_path = os.path.join(edit_dir, 'DatosExportados.csv')
+    
+    # candas.crear(cedula)
+    
+    candas.editar(nombre,cedula)
     
     # Descargar el archivo en el computador del usuario
-    return FileResponse(file_path, filename=file.filename)
+    return FileResponse(file_path, filename='DatosExportados.csv')
+
+@app.post("/listar")
+async def upload_image(cedula: str = Form(...)):
+    # candas.crear(cedula)
+    # file_path = os.path.join(upload_dir, file.filename)
+    
+    result = candas.list(cedula)
+    
+    data = {
+    'index': result.iloc[0],
+    'Nombre': result.iloc[1],
+    'Cedula': str(result.iloc[2])
+    }
+    
+    print(data)
+    
+    
+    # Descargar el archivo en el computador del usuario
+    return json.dumps(data)
