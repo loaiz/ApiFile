@@ -64,7 +64,7 @@ edit_dir = os.path.join(os.path.dirname(__file__),)
 
 
 @app.post("/editar")
-async def upload_image(file: UploadFile = File(...), cedula: str = Form(...), nombre: str = Form(...)):
+async def upload_image(cedula: str = Form(...), nombre: str = Form(...)):
     contents = await file.read()
     with open(os.path.join(upload_dir, file.filename), "wb") as f:
         f.write(contents)
