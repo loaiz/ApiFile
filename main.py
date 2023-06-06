@@ -79,7 +79,7 @@ async def upload_image(cedula: str = Form(...), nombre: str = Form(...)):
     
     # Descargar el archivo en el computador del usuario
 #     return FileResponse(file_path, filename='DatosExportados.csv')
-     return df
+    return df
 
 @app.post("/listar")
 async def upload_image(cedula: str = Form(...)):
