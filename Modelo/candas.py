@@ -45,6 +45,7 @@ def editar(Nombre,Cedula):
         df1.to_csv('DatosExportados.csv',header=True, index=False)
 
         print(df1)
+        return df1
         
 def list(cedula):
         df = pd.read_csv('DatosExportados.csv')
