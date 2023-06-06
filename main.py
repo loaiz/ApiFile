@@ -75,10 +75,11 @@ async def upload_image(cedula: str = Form(...), nombre: str = Form(...)):
     
     # candas.crear(cedula)
     
-    candas.editar(nombre,cedula)
+    df = candas.editar(nombre,cedula)
     
     # Descargar el archivo en el computador del usuario
-    return FileResponse(file_path, filename='DatosExportados.csv')
+#     return FileResponse(file_path, filename='DatosExportados.csv')
+     return df
 
 @app.post("/listar")
 async def upload_image(cedula: str = Form(...)):
