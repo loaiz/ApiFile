@@ -12,6 +12,9 @@ from starlette.responses import FileResponse
 from Modelo import candas
 import pandas as pd
 import json
+# from flask import Flask, send_file
+from PIL import Image
+from matplotlib import pyplot as plt
 
 
 SECRET_KEY = "83daa0256a2289b0fb23693bf1f6034d44396675749244721a2b20e896e11662"
@@ -63,11 +66,35 @@ upload_dir = os.path.join(os.path.dirname(__file__), "uploads")
 edit_dir = os.path.join(os.path.dirname(__file__),)
 
 
+@app.post("/imagen")
+async def upload_image_gray(file: UploadFile = File(...), cedula: str = Form(...), nombre: str = Form(...)):
+    contents = await file.read()
+    with open(os.path.join(upload_dir, file.filename), "wb") as f:
+        f.write(contents)
+    archivo_real = upload_dir+'/'+ file.filename
+    
+    print(archivo_real)
+    # Obtener la ruta completa del archivo subido
+    file_path = os.path.join(upload_dir, file.filename)
+    
+    # print(file_path)
+    # candas.crear(cedula)
+    
+    foto = candas.preprocesamiento_imagen(archivo_real)
+    candas.deteccion_rostro_haar(foto)
+    plt.imshow(foto)
+    plt.show()
+    print(foto)
+    # foto.save('imagen_generada.png')
+    # Descargar el archivo en el computador del usuario
+    # send_file('imagen_generada.png', as_attachment=True)
+    return FileResponse(file_path, filename=file.filename)
+
 @app.post("/editar")
-async def upload_image(cedula: str = Form(...), nombre: str = Form(...)):
-#     contents = await file.read()
-#     with open(os.path.join(upload_dir, file.filename), "wb") as f:
-#         f.write(contents)
+async def upload_image(file: UploadFile = File(...), cedula: str = Form(...), nombre: str = Form(...)):
+    contents = await file.read()
+    with open(os.path.join(upload_dir, file.filename), "wb") as f:
+        f.write(contents)
     
     print(edit_dir)
     # Obtener la ruta completa del archivo subido
@@ -79,7 +106,6 @@ async def upload_image(cedula: str = Form(...), nombre: str = Form(...)):
     
     # Descargar el archivo en el computador del usuario
     return FileResponse(file_path, filename='DatosExportados.csv')
-#     return df
 
 @app.post("/listar")
 async def upload_image(cedula: str = Form(...)):
