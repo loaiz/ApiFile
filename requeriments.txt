@@ -1,4 +1,4 @@
-fastapifastapi
+fastapi
 uvicorn[standard]
 python-multipart
 python-jose[cryptography]
@@ -12,10 +12,3 @@ scikit-image
 imageio[pyav]
 Pillow
 matplotlib
-uvicorn[standard]
-python-multipart
-python-jose[cryptography]
-passlib[bcrypt]
-pydantic
-starlette
-pandas
