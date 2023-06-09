@@ -116,7 +116,7 @@ async def upload_image(cedula: str = Form(...)):
     
     
 @app.post("/Prueba")    
-async def upload_image(Numero1: str = Form(...), Numero2: str = form(...)):
+async def upload_image(Numero1: str = Form(...), Numero2: str = Form(...)):
     # candas.crear(cedula)
     # file_path = os.path.join(upload_dir, file.filename)
     
