@@ -63,23 +63,8 @@ def editar(Nombre,Cedula):
         
 def list(cedula):
         df = pd.read_csv('DatosExportados.csv')
-        print(df)
-        # Obras=df[df["Cedula"] != cedula].index
-        # print(Obras)
-        # Obra=df.drop(Obras)
-        # time.sleep(1)
-        # Obra.reset_index(inplace=True, drop=True)
-        # # Facturacion[:,1]
-        # Obra.iloc[0]
-        # nombre = Obra.iloc[:, 2]
-        # contador = nombre[0]
-        
         df = df.loc[df['Cedula'] == int(cedula)]
-        
         df = df.iloc[0]
-        
-        print(df)
-        
         return df
         
 def preprocesamiento_imagen(ruta_imagen):
@@ -96,9 +81,7 @@ def deteccion_rostro_haar(imagen_grises_rgb):
     deteccion_rostros=cv2.CascadeClassifier(cv2.data.haarcascades+'haarcascade_frontalface_default.xml') #(path_modelo_rostro)
     rostros_detectados=deteccion_rostros.detectMultiScale(imagen_grises_rgb,scaleFactor=1.1,minNeighbors=5,minSize=(30, 30),flags=cv2.CASCADE_SCALE_IMAGE)
     area=[]
-    #for (x, y, Dx, Dy) in rostros_detectados:
-    #    cv2.rectangle(imagen_grises_rgb, (x, y), (x+Dx, y+Dy), (0, 255, 0), 3)
-    
+
     if len(rostros_detectados)>=1:
         deteccion=True
         rostros=1
@@ -111,15 +94,6 @@ def deteccion_rostro_haar(imagen_grises_rgb):
     else:
         deteccion=False
         rostros=0
-    
-    
-    
-    #if len(rostros_detectados)==0:
-     #   deteccion=False
-     #   rostros=0
-    #else:
-     #   deteccion=True
-      #  rostros=len(rostros_detectados)
-    # print(rostros)
+
     print(imagen_grises_rgb, deteccion, rostros, rostros_detectados)
     return imagen_grises_rgb, deteccion, rostros, rostros_detectados
