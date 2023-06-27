@@ -1,5 +1,5 @@
 # Api Example file request
-Este proyecto tiene como funcion subir una imagen en cualquier formato y convertir su rgb de colores a escalas de grises
+Este proyecto tiene como funcion subir una imagen en cualquier formato y convertir su rgb de colores a escalas de grises y detectar un rostro
 ## Requerimientos
 
 - Python 3.7+
