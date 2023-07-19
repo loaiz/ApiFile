@@ -100,9 +100,9 @@ def realizar_estimacion_similitud(transformacion,modelo_reconocimiento,nombre_ke
     return identificado, sujeto, max(similitud)
 
 
-def entrenamiento_facenet(transformacion,modelo_reconocimiento,lista_rostros,lista_etiquetas):
+def entrenamiento_facenet(transformacion,modelo_reconocimiento,lista_rostros,lista_etiquetas,base_dir):
     
-    archivo_destino= r'C:\Users\Yeferson Loaiza\OneDrive\Documentos\Face api\Modelo\kernel_modelo.hdf5'
+    archivo_destino= os.path.join(base_dir, r'Modelo\kernel_modelo.hdf5')
     archivo_hdf5=h5py.File(archivo_destino, 'a')
     
     for rostro, etiqueta in zip(lista_rostros,lista_etiquetas):
