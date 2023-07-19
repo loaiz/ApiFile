@@ -1,99 +1,118 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jun 29 08:33:05 2022
+@author: 
 
-@author: Yeferson Loaiza
+██╗░░░██╗███████╗███████╗███████╗██████╗░░██████╗░█████╗░███╗░░██╗  ██╗░░░░░░█████╗░░█████╗░██╗███████╗░█████╗░
+╚██╗░██╔╝██╔════╝██╔════╝██╔════╝██╔══██╗██╔════╝██╔══██╗████╗░██║  ██║░░░░░██╔══██╗██╔══██╗██║╚════██║██╔══██╗
+░╚████╔╝░█████╗░░█████╗░░█████╗░░██████╔╝╚█████╗░██║░░██║██╔██╗██║  ██║░░░░░██║░░██║███████║██║░░███╔═╝███████║
+░░╚██╔╝░░██╔══╝░░██╔══╝░░██╔══╝░░██╔══██╗░╚═══██╗██║░░██║██║╚████║  ██║░░░░░██║░░██║██╔══██║██║██╔══╝░░██╔══██║
+░░░██║░░░███████╗██║░░░░░███████╗██║░░██║██████╔╝╚█████╔╝██║░╚███║  ███████╗╚█████╔╝██║░░██║██║███████╗██║░░██║
+░░░╚═╝░░░╚══════╝╚═╝░░░░░╚══════╝╚═╝░░╚═╝╚═════╝░░╚════╝░╚═╝░░╚══╝  ╚══════╝░╚════╝░╚═╝░░╚═╝╚═╝╚══════╝╚═╝░░╚═╝
 """
+
+from facenet_pytorch import InceptionResnetV1, MTCNN
+from matplotlib import pyplot as plt
+from PIL import Image
+import seaborn as sns
 import pandas as pd
-# from sagemaker import get_execution_role
-# import boto3
-import pickle
-import cv2
 import numpy as np
-# from matplotlib import pyplot as plt
-# import seaborn as sns
-import tensorflow as tf
-import pandas as pd
-from skimage import io
+import pickle
+import h5py
+import cv2
 import os
-from tensorflow.keras.models import load_model
-from tensorflow.keras.applications.mobilenet import MobileNet
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.mobilenet import preprocess_input
-
-#Pandas
-def crear(Cedula):
-    datos = {'Nombre':
-    ['Chaloi','Mariso','Yolanda','Tina'],'Cedula':
-    ['100','90','100','80']}
-
-    df = pd.DataFrame(datos)
-
-    df.to_csv('DatosExportados.csv',header=True, index=False)
-
-    print(df)
-
-    data = {'Product': ['AAA','BBB'],
-            'Price': ['210','250']}
-
-    df = pd.DataFrame(data)
-    df['Price'] = pd.to_numeric(df['Price'])
-
-    print (df)
-    print (df.dtypes)
-    return df
-
-def editar(Nombre,Cedula):
-        
-        print(Nombre,Cedula)
-        df = pd.read_csv('DatosExportados.csv')
-        df = df.reset_index(drop=True)
-        datos = {'Nombre':
-                [Nombre],'Cedula':
-                [Cedula]}
-        
-        datos = pd.DataFrame(datos)
-        print(datos)
-        print(df)
-        # df1 = df.append(datos, ignore_index = True)
-        df1 = pd.concat([df, datos]).reset_index(drop=True)
-        df1.to_csv('DatosExportados.csv',header=True, index=False)
-
-        print(df1)
-        
-def list(cedula):
-        df = pd.read_csv('DatosExportados.csv')
-        df = df.loc[df['Cedula'] == int(cedula)]
-        df = df.iloc[0]
-        return df
         
 def preprocesamiento_imagen(ruta_imagen):
     
-    imagen_original=io.imread(ruta_imagen)
-    
+    imagen_original=cv2.imread(ruta_imagen)
     imagen_grises=cv2.cvtColor(imagen_original, cv2.COLOR_BGR2GRAY)
     imagen_grises_rgb=cv2.cvtColor(imagen_grises,cv2.COLOR_GRAY2RGB)
+    imagen_grises_rgb = Image.fromarray(imagen_grises_rgb)
+    
     return imagen_grises_rgb
 
 
-def deteccion_rostro_haar(imagen_grises_rgb):
-    
-    deteccion_rostros=cv2.CascadeClassifier(cv2.data.haarcascades+'haarcascade_frontalface_default.xml') #(path_modelo_rostro)
-    rostros_detectados=deteccion_rostros.detectMultiScale(imagen_grises_rgb,scaleFactor=1.1,minNeighbors=5,minSize=(30, 30),flags=cv2.CASCADE_SCALE_IMAGE)
-    area=[]
+def deteccion_rostro_haar(modelo,imagen_grises_rgb):
 
-    if len(rostros_detectados)>=1:
+    img = modelo.detect(imagen_grises_rgb)
+    (x0, y0, x1, y1) = (img[0][0][0], img[0][0][1], img[0][0][2], img[0][0][3])
+    
+    if img is not None:
         deteccion=True
         rostros=1
-        for (x, y, Dx, Dy) in rostros_detectados:
-            area.append(Dx*Dy)
-        seleccion=area.index(max(area))
-        rostros_detectados=rostros_detectados[seleccion]
-        (x,y,Dx,Dy)=rostros_detectados
-        cv2.rectangle(imagen_grises_rgb, (x, y), (x+Dx, y+Dy), (0, 255, 0), 3)
+        rostros_detectados = imagen_grises_rgb.crop((x0, y0, x1, y1)).resize((160,160))
     else:
         deteccion=False
         rostros=0
+        rostros_detectados = None
+    
+    return rostros_detectados, deteccion, rostros
 
-    print(imagen_grises_rgb, deteccion, rostros, rostros_detectados)
-    return imagen_grises_rgb, deteccion, rostros, rostros_detectados
+def definicion_conjunto(df,path,modelo_deteccion):
+
+    set_salida=[]
+    set_no_rostro_detectado=[]
+    set_etiquetas=[]
+    
+    for index, row in df.iterrows():
+        img_gr=preprocesamiento_imagen(path)
+        img,det,ros=deteccion_rostro_haar(modelo_deteccion,img_gr)
+        
+        if det==True:
+            set_salida.append(img)
+            set_etiquetas.append(row['IDENTIFICACION'])
+        else:
+            set_no_rostro_detectado.append(row['IDENTIFICACION'])
+    
+    return set_salida, set_etiquetas, set_no_rostro_detectado
+
+def lectura_kernel(nombre_kernel):
+    
+    archivo_kernel=h5py.File(nombre_kernel,'r')
+    
+    return archivo_kernel
+
+
+def realizar_estimacion_similitud(transformacion,modelo_reconocimiento,nombre_kernel,umbral_identificacion,rostro_identificar):
+    
+    similitud=[]
+    kernel_modelo = lectura_kernel(nombre_kernel)
+    lista_kernel = list(kernel_modelo.keys())
+    tensor_identificar = modelo_reconocimiento((transformacion(rostro_identificar)/255).unsqueeze(0))
+    
+    for sujeto in lista_kernel:
+        vector_sujeto = kernel_modelo[sujeto][:]
+        modulo_sujeto = np.linalg.norm(vector_sujeto)
+        vector_identificar = tensor_identificar.detach().numpy()
+        modulo_identificar = np.linalg.norm(vector_identificar)
+        coef_sim = np.dot(vector_sujeto,vector_identificar.T)/(modulo_sujeto*modulo_identificar)
+        similitud.append(coef_sim)
+        
+    kernel_modelo.close()
+    posicion = similitud.index(max(similitud))
+    
+    if max(similitud) >= umbral_identificacion:
+        identificado = True
+        sujeto = lista_kernel[posicion]
+    else:
+        identificado = False
+        sujeto = 'Desconocido'
+
+    return identificado, sujeto, max(similitud)
+
+
+def entrenamiento_facenet(transformacion,modelo_reconocimiento,lista_rostros,lista_etiquetas):
+    
+    archivo_destino= r'C:\Users\Yeferson Loaiza\OneDrive\Documentos\Face api\Modelo\kernel_modelo.hdf5'
+    archivo_hdf5=h5py.File(archivo_destino, 'a')
+    
+    for rostro, etiqueta in zip(lista_rostros,lista_etiquetas):
+        vector_caracteristico=modelo_reconocimiento((transformacion(rostro)/255).unsqueeze(0))
+
+        try:
+            archivo_hdf5.create_dataset(etiqueta, data=vector_caracteristico.detach().numpy())
+        except:
+            archivo_hdf5.__delitem__(etiqueta)
+            archivo_hdf5.create_dataset(etiqueta, data=vector_caracteristico.detach().numpy())
+
+    archivo_hdf5.close()  
+    return True
