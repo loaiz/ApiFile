@@ -6,9 +6,13 @@ passlib[bcrypt]
 pydantic
 pandas
 opencv-python
-tensorflow
+tensorflow==2.11.0
 flask
 scikit-image
 imageio[pyav]
 Pillow
 matplotlib
+facenet-pytorch
+sagemaker
+seaborn
+facenet-pytorch
