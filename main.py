@@ -36,6 +36,8 @@ import os
 
 app = FastAPI()
 
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
 upload_dir = os.path.join(os.path.dirname(__file__), "uploads")
 
 Model = os.path.join(os.path.dirname(__file__), "Modelo")
@@ -91,7 +93,7 @@ async def upload_image_gray(file: UploadFile = File(...)):
     transforms.PILToTensor()
     ])
     
-    identificado, sujeto, similitud = candas.realizar_estimacion_similitud(transform,modelo_facenet,r'C:\Users\Yeferson Loaiza\OneDrive\Documentos\Face api\Modelo\kernel_modelo.hdf5', 0.7,img_fo)
+    identificado, sujeto, similitud = candas.realizar_estimacion_similitud(transform,modelo_facenet,os.path.join(base_dir, r'Modelo\kernel_modelo.hdf5') , 0.7,img_fo)
     
     df_solucion = pd.concat([df_solucion,pd.DataFrame(
         [{
@@ -162,6 +164,6 @@ async def upload_image_gray(file: UploadFile = File(...)):
     transforms.PILToTensor()
     ])
     
-    entrenamiento = candas.entrenamiento_facenet(transform,modelo_facenet,set_train,set_train_etiqueta)
+    entrenamiento = candas.entrenamiento_facenet(transform,modelo_facenet,set_train,set_train_etiqueta,base_dir)
     
     return entrenamiento
